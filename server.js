@@ -19,10 +19,18 @@ wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         console.log(`Received: ${message}`);
 
-        // Create a message object to broadcast
-        const broadcastMessage = JSON.stringify({ message });
+        // Parse the received message
+        let parsedMessage;
+        try {
+            parsedMessage = JSON.parse(message);
+        } catch (e) {
+            console.error('Failed to parse message', e);
+            return;
+        }
 
-        // Broadcast the message to all clients
+        // Broadcast the message content to all connected clients
+        const broadcastMessage = JSON.stringify({ message: parsedMessage.message });
+
         wss.clients.forEach(client => {
             if (client !== ws && client.readyState === WebSocket.OPEN) {
                 client.send(broadcastMessage);
